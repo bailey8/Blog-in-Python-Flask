@@ -1,0 +1,7 @@
+.env
+.flaskenv
+
+venv
+app.db
+microblog.log*
+__pycache__

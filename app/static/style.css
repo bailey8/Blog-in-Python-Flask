@@ -1,0 +1,9 @@
+.navbar-dark {
+    background-color: rgba(4, 4, 4, 0.73);
+ }
+.navbar .a{
+    color:white;
+}
+nav .navbar-nav li a{
+  color: white ;
+  }

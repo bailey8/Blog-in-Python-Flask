@@ -1,0 +1,49 @@
+<table class="table table-hover">
+    <tr>
+        <td width="70px">
+
+
+            <a href="{{ url_for('main.user', username=post.author.username) }}">
+                <img src="{{post.author.avatar(70)}}"/>
+            </a>
+        </td>
+        <td>
+            <!-- this is needed to make the username next to each post a link and be compatible with babel-->
+            {% set user_link %}
+        <!-- give each username link a user_popup class so popup() can be called on them
+         wrapped in <span> bc popup needs to be a child of the element, and we don't want it to be a child of <a>-->
+             <span class="user_popup">
+                        <a href="{{ url_for('main.user', username=post.author.username) }}">
+                            {{ post.author.username }}
+                        </a>
+                    </span>
+            {% endset %}
+        <!-- displays username of each post, and then uses moment() to render proper time-->
+            {{ _('%(username)s said %(when)s', username=user_link, when=moment(post.timestamp).fromNow()) }}
+            <br>
+            <!-- give the body of the post an ID of "post+the posts actual id" so we can access that element for translations-->
+            <span id="post{{ post.id }}">{{ post.body }}</span>
+            <!-- first checks if post language is not empty, then checks if it's in a different language than the users-->
+            {% if post.language and post.language != g.locale %}
+                <br><br>
+                <!-- again match id to post id-->
+                <span id="translation{{ post.id }}">
+                    <!-- put the function in the link directly -->
+                    <a href="javascript:translate(
+                                '#post{{ post.id }}',
+                                '#translation{{ post.id }}',
+                                '{{ post.language }}',
+                                '{{ g.locale }}');">{{ _('Translate') }}</a>
+                </span>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<!-- This is run for every post on the index/explore route
+
+[Avatar]   [user(link)] [said a day ago]
+           [post]
+
+           [translate]
+ -->

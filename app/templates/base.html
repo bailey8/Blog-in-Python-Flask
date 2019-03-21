@@ -1,0 +1,168 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    Jordan B
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-dark bg-dark">
+         <div class="container">
+
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+             </div>
+
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.index') }}">{{ _('Home') }}</a></li>
+                    <li><a href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a></li>
+                </ul>
+            <!-- g.search_form may not be defined on error pages and the action points to a different route-->
+                 {% if g.search_form %}
+                <form class="navbar-form navbar-left" method="get" action="{{ url_for('main.search') }}">
+                    <div class="form-group">
+                        {{ g.search_form.q(size=20, class='form-control', placeholder=g.search_form.q.label.text) }}
+                    </div>
+                </form>
+                {% endif %}
+
+                 <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_anonymous %}
+                         <li><a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a></li>
+                    {% else %}
+                          <li>
+                        <a href="{{ url_for('main.about') }}">{{ _('About the site') }} </a>
+                    </li>
+                         <li><a href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
+                    {% endif %}
+                </ul>
+
+            </div>
+        </div>
+        </nav>
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+{% endblock %}
+
+
+
+<!-- Include the script for the moment library and configure moment to use correct language
+ super() also makes ure to inherit the pre-existing bootstrap js-->
+{% block scripts %}
+
+    {{ super() }}
+    <!-- add moment.js library, exposed through this function -->
+    {{ moment.include_moment() }}
+    <!-- The moment.js library does support different languages, all I need to do is configure the proper language. -->
+    {{ moment.lang(g.locale) }}
+    <script>
+        //This function submits data to the server in a format that is similar to how the browser submits a web form,
+        // allows Flask to incorporate this data into the request.form dictionary
+        function translate(sourceElem, destElem, sourceLang, destLang) {
+            //put loading gif where translate link was
+            $(destElem).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
+            //send post request with data
+            $.post('/translate', {
+                //first enter the contents of the post
+                text: $(sourceElem).text(),
+                //post.language
+                source_language: sourceLang,
+                //g.locale (the user's language)
+                dest_language: destLang
+            //put response translation where the "translate" link was
+            }).done(function(response) {
+                $(destElem).text(response['text'])
+            }).fail(function() {
+                $(destElem).text("{{ _('Error: Could not contact server.') }}");
+            });
+        }
+
+         $(function () {
+             //make the timer object accessible also to the "mouse out" and "mouse in" handler.
+            var timer = null;
+            // hold the asynchronous request object, which I initialize from a call to $.ajax()
+            var xhr = null;
+            //function on hover in
+            $('.user_popup').hover(
+                function(event) {
+                    //extract the element that triggered the event
+                    var elem = $(event.currentTarget);
+                    //add 1 sec delay for popup to appear
+                    timer = setTimeout(function () {
+                        timer = null;
+                        //if this xhr object exists on mouse out event, it will be set to null
+                        xhr = $.ajax(
+                            //get the username that was in the link. The first child of the <span> elem is the link we need
+                            //use trim() to get rid of whitespace
+                            '/user/' + elem.first().text().trim() + '/popup').done(
+                            //take the html content that will be put in popover
+                            function (data) {
+                                xhr = null;
+                                //trigger popover
+                                elem.popover({
+                                    //manual so popup can be displayed via my custom js calls, not default
+                                    trigger: 'manual',
+                                    html: true,
+                                    animation: false,
+                                    //this makes the popover a child element, not a sibling
+                                    container: elem,
+                                    content: data
+                                }).popover('show');
+                                //when new Flask-Moment elements are added via Ajax
+                                // the flask_moment_render_all() function needs to be called to render the elements.
+                                flask_moment_render_all();
+                            }
+                        );
+                    }, 1000);
+                },
+                //function on hover out
+                function(event) {
+                    var elem = $(event.currentTarget);
+                    //clear timer if it exists, bc without this the timer will go off and still trigger poppup
+                    if (timer) {
+                        clearTimeout(timer);
+                        timer = null;
+                    }
+                    //if the xhr request exits, cancel it because the user moved mouse out
+                    else if (xhr) {
+                        xhr.abort();
+                        xhr = null;
+                    }
+                    //if the popup is currently displayed, destroy it
+                    else {
+                        elem.popover('destroy');
+                    }
+                }
+            );
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <div class="container">
+    <!-- check for any flashed messages -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                        <div class="alert alert-info" role="alert">{{ message }}</div>
+
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
