@@ -124,11 +124,11 @@ class User(UserMixin, PaginatedAPIMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def avatar(self, size):
-        # if current_user.username == "jordan":
-        #     return
+    def avatar(self, size,username = None):
+        if username == "Jordan":
+            return f"/static/J{size}.jpeg"
         if randint(1, 2) == 1:
-            return f"/static/python{size}.jpg"
+                return f"/static/python{size}.jpg"
         return f"/static/flask{size}.png"
 
     def follow(self, user):

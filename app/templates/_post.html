@@ -4,7 +4,7 @@
 
 
             <a href="{{ url_for('main.user', username=post.author.username) }}">
-                <img src="{{post.author.avatar(70)}}"/>
+                <img src="{{post.author.avatar(70,post.author.username)}}"/>
             </a>
         </td>
         <td>
