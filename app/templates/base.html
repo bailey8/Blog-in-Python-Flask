@@ -133,7 +133,7 @@
                         clearTimeout(timer);
                         timer = null;
                     }
-                    //if the xhr request exits, cancel it because the user moved mouse out
+                    //if the xhr request exits, cancel it because the user moved mouse out so we don't want to see the translation
                     else if (xhr) {
                         xhr.abort();
                         xhr = null;

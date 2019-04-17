@@ -28,7 +28,7 @@ babel = Babel()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-
+    #must initialaize extensions this way because
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
@@ -37,7 +37,7 @@ def create_app(config_class=Config):
     moment.init_app(app)
     babel.init_app(app)
     #to initialize it I need access to app.config, which only becomes available after the create_app() function is invoked
-    #ass an elasticsearch attribute to the app instance. Elasticsearch not wrapped by flask extension
+    #add an elasticsearch attribute to the app instance. Elasticsearch not wrapped by flask extension
     #create an instance of class Elasticsearch to do the searching
     #make the elasticsearch attribute None if I didn't configure the env variable
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None

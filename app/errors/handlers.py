@@ -15,6 +15,7 @@ def wants_json_response():
 def not_found_error(error):
     if wants_json_response():
         return api_error_response(404)
+    #default 2nd return value is 200, want status code to reflect actual error
     return render_template('errors/404.html'), 404
 
 

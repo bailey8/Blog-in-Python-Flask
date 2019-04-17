@@ -21,7 +21,7 @@ def before_request():
         db.session.commit()
         #put form here bc it's used in almost every request
         g.search_form = SearchForm()
-    #The get_locale() function from Flask-Babel returns a locale object, but I just want to have the language code, which can be obtained by converting the object to a string
+     #The get_locale() function from Flask-Babel returns a locale object, but I just want to have the language code, which can be obtained by converting the object to a string
     #I can access it from the base template to configure moment.js with the correct language
     #unique to each application context
     g.locale = str(get_locale())
@@ -33,6 +33,7 @@ def before_request():
 def index():
     form = PostForm()
     if form.validate_on_submit():
+        #assign language to the post based off it's content, to be used for translations later
         language = guess_language(form.post.data)
         #Save lang as "" if it isn't known or unexpected result returned
         if language == 'UNKNOWN' or len(language) > 5:
@@ -88,6 +89,7 @@ def user_popup(username):
 @bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    #put current User's username in form by default
     form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
