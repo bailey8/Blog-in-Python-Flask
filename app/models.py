@@ -241,8 +241,6 @@ class Post(SearchableMixin, db.Model):
         return '<Post {}>'.format(self.body)
     #
 
-
-
 @login.user_loader
 def load_user(id):
     #convert to int so we can use it in a query in the db
